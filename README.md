@@ -1,1 +1,1 @@
-# BNYCapstoneCMU
+# BNYCapstoneCMU Project
