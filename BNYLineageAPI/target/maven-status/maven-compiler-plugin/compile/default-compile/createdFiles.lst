@@ -1,2 +1,2 @@
-com\mycompany\bnylineageapi\Neo4JHandler.class
-com\mycompany\bnylineageapi\ServerServlet.class
+com/mycompany/bnylineageapi/Neo4JHandler.class
+com/mycompany/bnylineageapi/ServerServlet.class
