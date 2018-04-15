@@ -6,9 +6,10 @@ from django.http import HttpResponse, Http404, JsonResponse
 
 from backend_api.DBdriver import *
 
+from backend_api.models import *
+
 # Create your views here.
 def handle(request):
-
     return HttpResponse("")
 
 
@@ -22,3 +23,27 @@ def BNYBackEndPost(request):
     handleJson(jsonObj)
     return HttpResponse()
     
+
+def getModels(request):
+    result = {}
+    systems = []
+    result['systems'] = systems
+    seen = set()
+    for node in Node.objects.all():
+        obj = {}
+        innerObj = {}
+        innerObj['id'] = node.name
+        obj['data'] = innerObj
+        systems.append(obj)
+        if not node.connections:
+            continue
+        for connection in node.connections.all():
+            innerObj = {}
+            innerObj['source'] = node.name
+            innerObj['target'] = connection.name
+            innerObj['id'] = node.name + connection.name
+            obj = {}
+            obj['data'] = innerObj
+            systems.append(obj)
+
+    return JsonResponse(result)
