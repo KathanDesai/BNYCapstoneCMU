@@ -57,6 +57,5 @@ public class ServerServlet extends HttpServlet {
         
         Neo4JHandler handler = new Neo4JHandler();
         handler.addObject(new JSONObject(sb.toString()));
-        
     }
 }

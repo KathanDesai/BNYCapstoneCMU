@@ -17,6 +17,6 @@ import org.json.JSONObject;
  */
 public class Neo4JHandler {
     public void addObject(JSONObject obj){
-        
+        System.out.println(obj);
     }
 }
