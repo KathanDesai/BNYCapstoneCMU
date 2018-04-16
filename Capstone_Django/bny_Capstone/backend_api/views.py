@@ -1,4 +1,3 @@
-from django.shortcuts import render, redirect, get_object_or_404
 
 import json
 
@@ -29,6 +28,9 @@ def getModels(request):
     systems = []
     result['systems'] = systems
     seen = set()
+    if not Node.objects.all():
+        return JsonResponse(result, status=400)
+
     for node in Node.objects.all():
         obj = {}
         innerObj = {}
@@ -37,6 +39,7 @@ def getModels(request):
         systems.append(obj)
         if not node.connections:
             continue
+
         for connection in node.connections.all():
             innerObj = {}
             innerObj['source'] = node.name
@@ -46,4 +49,4 @@ def getModels(request):
             obj['data'] = innerObj
             systems.append(obj)
 
-    return JsonResponse(result)
+    return JsonResponse(result, status=200)
