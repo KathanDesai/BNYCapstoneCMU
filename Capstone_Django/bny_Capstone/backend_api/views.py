@@ -17,36 +17,44 @@ def BNYBackEndPost(request):
         raise Http404
     jsonString = request.POST['JsonData']
     jsonObj = json.loads(jsonString)
-    # {'source': 's1name', 'destination': 's2name', 'fields': [{'fname1': 'fval1'}, {'fname2': 'fval2'}]}
-    print(jsonObj)
+    # {'source': 's1name', 'destination': 's2name', 'fields': ['fname1', 'fname2']}
+    #print(jsonObj)
     handleJson(jsonObj)
     return HttpResponse()
-    
+
+
+def getOverlaps(request):
+    result = {}
+    for sys in System.objects.all():
+        for rel in sys.relationsFrom.all():
+            print(rel.fromSystem.name + ' -> ' + rel.toSystem.name)
+    return JsonResponse(result, status=200)
+
+
+
 
 def getModels(request):
     result = {}
     systems = []
     result['systems'] = systems
     seen = set()
-    if not Node.objects.all():
+    if not System.objects.all():
         return JsonResponse(result, status=400)
 
-    for node in Node.objects.all():
+    for system in System.objects.all():
         obj = {}
         innerObj = {}
-        innerObj['id'] = node.name
+        innerObj['id'] = system.name
         obj['data'] = innerObj
         systems.append(obj)
-        if not node.connections:
-            continue
 
-        for connection in node.connections.all():
-            innerObj = {}
-            innerObj['source'] = node.name
-            innerObj['target'] = connection.name
-            innerObj['id'] = node.name + connection.name
-            obj = {}
-            obj['data'] = innerObj
-            systems.append(obj)
+    for relation in Relationship.objects.all():
+        innerObj = {}
+        innerObj['source'] = relation.fromSystem.name
+        innerObj['target'] = relation.toSystem.name
+        innerObj['id'] = innerObj['source'] + innerObj['target']
+        obj = {}
+        obj['data'] = innerObj
+        systems.append(obj) 
 
     return JsonResponse(result, status=200)
