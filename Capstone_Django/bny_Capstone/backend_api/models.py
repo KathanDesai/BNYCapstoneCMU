@@ -6,7 +6,6 @@ class Node(models.Model):
     connections = models.ManyToManyField('self')
 
 
-    
 
     def addConnection(self, otherNode):
         self.connections.add(otherNode)
