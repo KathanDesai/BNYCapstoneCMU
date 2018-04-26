@@ -17,11 +17,10 @@ class System(models.Model):
     def addConnectionFrom(self, otherSystem):
         self.connectionsFrom.add(otherSystem)
 
-    
-
- 
+    def __str__ (self):
+        return self.name
 
 class Relationship(models.Model):
-    fromSystem = models.ForeignKey(System, related_name="relationsTo")
-    toSystem =  models.ForeignKey(System, related_name="relationsFrom")
+    fromSystem = models.ForeignKey(System, related_name="relationsTo", on_delete=models.CASCADE)
+    toSystem =  models.ForeignKey(System, related_name="relationsFrom", on_delete=models.CASCADE)
     attributes = models.ManyToManyField(Attribute, related_name="rel_attributes")

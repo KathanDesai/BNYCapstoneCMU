@@ -1,4 +1,3 @@
-
 import json
 
 from backend_api.models import *
@@ -8,6 +7,8 @@ from django.http import HttpResponse, Http404, JsonResponse
 from backend_api.DBdriver import *
 
 from backend_api.models import *
+from django.shortcuts import get_object_or_404
+
 
 # Create your views here.
 def handle(request):
@@ -20,35 +21,45 @@ def BNYBackEndPost(request):
     jsonString = request.POST['JsonData']
     jsonObj = json.loads(jsonString)
     # {'source': 's1name', 'destination': 's2name', 'fields': ['fname1', 'fname2']}
-    #print(jsonObj)
+    # print(jsonObj)
     handleJson(jsonObj)
     return HttpResponse()
 
-<<<<<<< HEAD
-def getData(request):
-    context_json = {}
-    if request.method == 'GET':
-        nodes = Node.objects.all()
-        for node in nodes:
-            print (node.name)
-            for neighour in node.connections.all():
-                print (neighour.name)
-
-    context_json['system'] = ['a'
-    ]
-    print (context_json)
-
-    return HttpResponse(context_json, content_type='application/json')
-=======
 
 def getOverlaps(request):
     result = {}
-    for sys in System.objects.all():
-        for rel in sys.relationsFrom.all():
-            print(rel.fromSystem.name + ' -> ' + rel.toSystem.name)
+    result['overlaps'] = []
+    # for every target system
+    for dest in Relationship.objects.values_list("toSystem_id",flat=True).distinct():
+        obj = {}
+        obj['dest'] = get_object_or_404(System, id=dest).name
+        #
+        obj['overlap'] = []
+        # find all the source systems whose destination is dest
+        sources = Relationship.objects.filter(toSystem_id=dest)
+
+        for i in range(len(sources)):
+            # print (sources[i].fromSystem.name)
+            # fields involves message from i to dest
+            relation1 =get_object_or_404(Relationship, toSystem_id=dest, fromSystem_id=sources[i].fromSystem.id)
+            # print (relation1.attributes.all())
+            for j in range(i + 1, len(sources)):
+                # fields involves message from j to dest
+                relation2 = get_object_or_404(Relationship, toSystem_id=dest, fromSystem_id=sources[j].fromSystem.id)
+                # find intersect if any
+                intersect = list(set(relation1.attributes.all()) & set(relation2.attributes.all()))
+
+                # if intersect detected
+                if len(intersect) > 0:
+                    for field in intersect:
+                        innerObj = {}
+                        innerObj['field'] = field.name
+                        innerObj['sources'] = [sources[i].fromSystem.name, sources[j].fromSystem.name]
+                        obj['overlap'].append(innerObj)
+
+                        # print(dest.fromSystem.name + ' -> ' + dest.toSystem.name)
+        result['overlaps'].append(obj)
     return JsonResponse(result, status=200)
-
-
 
 
 def getModels(request):
@@ -73,7 +84,6 @@ def getModels(request):
         innerObj['id'] = innerObj['source'] + innerObj['target']
         obj = {}
         obj['data'] = innerObj
-        systems.append(obj) 
+        systems.append(obj)
 
     return JsonResponse(result, status=200)
->>>>>>> 3e5edaf6947aaa5d130a05bcea820e9279aa6779

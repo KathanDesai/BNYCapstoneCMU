@@ -1,0 +1,16 @@
+{
+    "overlaps": [
+        {
+            "dest": "b",
+            "overlap": [
+                {
+                    "field": "f1",
+                    "sources": [
+                        "a",
+                        "c"
+                    ]
+                }
+            ]
+        }
+    ]
+}
