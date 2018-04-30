@@ -23,7 +23,7 @@ def BNYBackEndPost(request):
     # {'source': 's1name', 'destination': 's2name', 'fields': ['fname1', 'fname2']}
     # print(jsonObj)
     handleJson(jsonObj)
-    return HttpResponse()
+    return HttpResponse(status=200)
 
 
 def getOverlaps(request):
@@ -87,3 +87,52 @@ def getModels(request):
         systems.append(obj)
 
     return JsonResponse(result, status=200)
+
+def manualProcessNode(request):
+    if request.method != 'POST' or not request.POST.get('nodeName') or not request.POST.get('action'):
+        raise Http404
+    # user adds a new node to system
+    nodeName = request.POST.get('nodeName')
+    if request.POST.get('action') == 'add':
+        system = get_object_or_404(System, name=nodeName)
+        # system does not existed, create a new one and savew
+        if not system:
+            newSystem = System(name=nodeName)
+            newSystem.save()
+            return HttpResponse(status=200)
+        else:
+            # try to add an existed node, return 404
+            return HttpResponse(status=403)
+
+    if request.POST.get('action') == 'remove':
+        system = get_object_or_404(System, name=nodeName)
+        # system does not existed, create a new one and savew
+        if system:
+            newSystem = System(name=nodeName)
+            newSystem.delete()
+            return HttpResponse(status=200)
+        else:
+            # try to remove a non-existed node, return 404
+            return HttpResponse(status=403)
+    # for any unexpected error, return 404
+    return HttpResponse(status=403)
+
+
+def manualProcessEdge(request):
+    if request.method != 'POST' or not request.POST.get('source') or not request.POST.get('destination'):
+        raise Http404
+
+    source = request.POST.get('source')
+    dest = request.POST.get('destination')
+    sourceSystem = get_object_or_404(System, name=source)
+    destSystem = get_object_or_404(System, name=dest)
+    if not sourceSystem or not destSystem:
+        # try to deal with systems don't exist
+        return HttpResponse(status=403)
+    relationship = get_object_or_404(Relationship, fromSystem_id=source, toSystem_id=dest)
+    if not relationship:
+        # there is none relationship between source and dest
+        return HttpResponse(status=403)
+
+    relationship.delete()
+    return HttpResponse(status=200)

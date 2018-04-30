@@ -6,5 +6,7 @@ urlpatterns = [
     url(r'^$', views.handle, name='homepage'),
     url(r'^processRequest', views.BNYBackEndPost),
     url(r'^getModels', views.getModels),
-    url(r'^getOverlaps', views.getOverlaps)
+    url(r'^getOverlaps', views.getOverlaps),
+    url(r'^manualProcessNode', views.manualProcessNode),
+    url(r'^manualProcessRelationship', views.manualProcessEdge),
     ]
