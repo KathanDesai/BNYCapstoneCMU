@@ -12,7 +12,7 @@ return 200 if executed successfully, or 403
 
 ## Manually add or remove edges
 ```
-127.0.0.1:8000/manualProcessNode
+127.0.0.1:8000/manualProcessRelationship
 ```
 A HTTP POST method to add or remove an edge between two nodes. The method expects two fiedls:
 - source The name of the source 

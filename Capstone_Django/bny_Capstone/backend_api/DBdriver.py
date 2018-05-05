@@ -1,4 +1,5 @@
 from backend_api.models import *
+import random
 
 def handleJson(jsonObj):
     sourceName  = jsonObj['source']
@@ -41,6 +42,8 @@ def handleJson(jsonObj):
         if not findInRelationship:
             relation.attributes.add(attribute)
 
-
+def getColorCode():
+    r = lambda: random.randint(0, 255)
+    return ('#%02X%02X%02X' % (r(), r(), r()))
 
 

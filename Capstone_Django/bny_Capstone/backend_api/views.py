@@ -1,5 +1,5 @@
 import json
-
+import random
 from backend_api.models import *
 
 from django.http import HttpResponse, Http404, JsonResponse
@@ -173,3 +173,6 @@ def manualProcessEdge(request):
         relationship[0].delete()
         return HttpResponse(status=200)
 
+def getColorCode():
+    r = lambda: random.randint(0, 255)
+    return ('#%02X%02X%02X' % (r(), r(), r()))

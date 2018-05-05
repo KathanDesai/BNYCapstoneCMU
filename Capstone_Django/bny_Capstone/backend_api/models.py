@@ -6,6 +6,7 @@ class Attribute(models.Model):
 
 class System(models.Model):
     name = models.TextField(default="")
+    color = models.TextField(default="")
     attributes = models.ManyToManyField(Attribute)
     #connectionsTo = models.ManyToManyField('self', symmetrical = False)
     #connectionsFrom = models.ManyToManyField('self', symmetrical = False)
