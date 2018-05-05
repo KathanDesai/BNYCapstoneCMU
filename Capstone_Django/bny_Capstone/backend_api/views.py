@@ -90,13 +90,16 @@ def getModels(request):
 
 def manualProcessNode(request):
     if request.method != 'POST' or not request.POST.get('nodeName') or not request.POST.get('action'):
-        raise Http404
+        return HttpResponse(status=403)
     # user adds a new node to system
     nodeName = request.POST.get('nodeName')
+    print (nodeName)
     if request.POST.get('action') == 'add':
-        system = get_object_or_404(System, name=nodeName)
+        system = System.objects.filter(name=nodeName)
+
+        # system = get_object_or_404(System, name=nodeName)
         # system does not existed, create a new one and savew
-        if not system:
+        if not system or len(system) == 0:
             newSystem = System(name=nodeName)
             newSystem.save()
             return HttpResponse(status=200)
@@ -105,11 +108,11 @@ def manualProcessNode(request):
             return HttpResponse(status=403)
 
     if request.POST.get('action') == 'remove':
-        system = get_object_or_404(System, name=nodeName)
-        # system does not existed, create a new one and savew
-        if system:
-            newSystem = System(name=nodeName)
-            newSystem.delete()
+        system = System.objects.filter(name=nodeName)
+        # system does existed, delete and save
+        if system and len(system) > 0:
+            # newSystem = System(name=nodeName)
+            system[0].delete()
             return HttpResponse(status=200)
         else:
             # try to remove a non-existed node, return 404
@@ -119,20 +122,33 @@ def manualProcessNode(request):
 
 
 def manualProcessEdge(request):
-    if request.method != 'POST' or not request.POST.get('source') or not request.POST.get('destination'):
-        raise Http404
+    if request.method != 'POST' or not request.POST.get('source') or not request.POST.get('destination') or not request.POST.get('action'):
+        return HttpResponse(status=403)
 
     source = request.POST.get('source')
     dest = request.POST.get('destination')
-    sourceSystem = get_object_or_404(System, name=source)
-    destSystem = get_object_or_404(System, name=dest)
-    if not sourceSystem or not destSystem:
+
+    sourceSystem = System.objects.filter(name=source)
+    destSystem = System.objects.filter(name=dest)
+
+
+    if not sourceSystem or len(sourceSystem) == 0 or not destSystem or len(destSystem) == 0:
         # try to deal with systems don't exist
         return HttpResponse(status=403)
-    relationship = get_object_or_404(Relationship, fromSystem_id=source, toSystem_id=dest)
-    if not relationship:
-        # there is none relationship between source and dest
-        return HttpResponse(status=403)
 
-    relationship.delete()
-    return HttpResponse(status=200)
+    relationship = Relationship.objects.filter(fromSystem_id=sourceSystem[0], toSystem_id=destSystem[0])
+
+
+    if request.POST.get('action') == 'add':
+        if relationship or len(relationship) > 0:
+            # there is none relationship between source and dest
+            return HttpResponse(status=403)
+        newR = Relationship(fromSystem=sourceSystem[0], toSystem=destSystem[0])
+        newR.save()
+        return HttpResponse(status=200)
+    if request.POST.get('action') == 'remove':
+        if not relationship:
+            return HttpResponse(status=403)
+        
+        relationship[0].delete()
+        return HttpResponse(status=200)
