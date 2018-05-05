@@ -25,6 +25,26 @@ def BNYBackEndPost(request):
     handleJson(jsonObj)
     return HttpResponse(status=200)
 
+def fileUpload(request):
+    if request.method != 'POST' or 'csv_file' not in request.FILES:
+        raise Http404
+    csv_file = request.FILES['csv_file']
+    if not csv_file.name.endswith('.csv'):
+        raise Http404
+    file_data = csv_file.read().decode("utf-8") 
+    lines = file_data.split("\n")
+    for line in lines:
+        cols = line.strip().split(',')
+        if len(cols) < 2: continue
+        jsonObj = {}
+        jsonObj['source'] = cols[0]
+        jsonObj['destination'] = cols[1]
+        jsonObj['fields'] = list()
+        for i in range(2, len(cols)):
+            jsonObj['fields'].append(cols[i])
+        handleJson(jsonObj)
+    return HttpResponse()
+
 
 def getOverlaps(request):
     result = {}
@@ -152,3 +172,4 @@ def manualProcessEdge(request):
         
         relationship[0].delete()
         return HttpResponse(status=200)
+
