@@ -10,7 +10,7 @@ def handleJson(jsonObj):
         print('found source')
         source = findSource[0]
     else:
-        source = System(name = sourceName)
+        source = System(name = sourceName, color=getColorCode())
         print(source)
         source.save()
 
@@ -19,7 +19,7 @@ def handleJson(jsonObj):
         print('found dest')
         dest = findDest[0]
     else:
-        dest = System(name = destName)
+        dest = System(name = destName, color=getColorCode())
         dest.save()
     
     findRelationShip = Relationship.objects.filter(fromSystem = source, toSystem = dest)
