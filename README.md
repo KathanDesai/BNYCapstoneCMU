@@ -19,4 +19,4 @@ A HTTP POST method to add or remove an edge between two nodes. The method expect
 - dest  The name of the destination 
 - action "add" stands for add a relationship, "remove" stands for remove an relationship 
 
-return 200 if executed successfully, or 403
+return 200 if executed successfully, or 400
