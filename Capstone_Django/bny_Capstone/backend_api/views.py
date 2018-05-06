@@ -8,7 +8,7 @@ from backend_api.DBdriver import *
 
 from backend_api.models import *
 from django.shortcuts import get_object_or_404
-
+from collections import defaultdict
 
 # Create your views here.
 def handle(request):
@@ -48,6 +48,41 @@ def fileUpload(request):
 
 def getOverlaps(request):
     result = {}
+    overlaps = []
+    for dest in Relationship.objects.values_list("toSystem_id",flat=True).distinct():
+        destName = get_object_or_404(System, id=dest).name
+        sources = Relationship.objects.filter(toSystem_id=dest)
+
+        for i in range(len(sources)):
+            # print (sources[i].fromSystem.name)
+            # fields involves message from i to dest
+            relation1 =get_object_or_404(Relationship, toSystem_id=dest, fromSystem_id=sources[i].fromSystem.id)
+            # print (relation1.attributes.all())
+            for j in range(i + 1, len(sources)):
+                # fields involves message from j to dest
+                relation2 = get_object_or_404(Relationship, toSystem_id=dest, fromSystem_id=sources[j].fromSystem.id)
+                # find intersect if any
+                intersect = list(set(relation1.attributes.all()) & set(relation2.attributes.all()))
+
+                # if intersect detected
+                if len(intersect) > 0:
+                    for field in intersect:
+                        innerObj = {}
+                        innerObj['field'] = field.name
+                        innerObj['dest'] = destName
+                        innerObj['sources'] = sources[i].fromSystem.name
+                        overlaps.append(innerObj)
+                        innerObj = {}
+                        innerObj['field'] = field.name
+                        innerObj['dest'] = destName
+                        innerObj['sources'] = sources[j].fromSystem.name
+                        overlaps.append(innerObj)
+    result['overlaps'] = overlaps    
+    return JsonResponse(result, status=200)
+
+""" 
+def getOverlaps(request):
+    result = {}
     result['overlaps'] = []
     # for every target system
     for dest in Relationship.objects.values_list("toSystem_id",flat=True).distinct():
@@ -79,7 +114,7 @@ def getOverlaps(request):
 
                         # print(dest.fromSystem.name + ' -> ' + dest.toSystem.name)
         result['overlaps'].append(obj)
-    return JsonResponse(result, status=200)
+    return JsonResponse(result, status=200) """
 
 
 def getModels(request):
