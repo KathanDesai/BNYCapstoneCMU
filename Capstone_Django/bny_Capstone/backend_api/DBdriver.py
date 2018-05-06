@@ -1,9 +1,15 @@
 from backend_api.models import *
 import random
+from django.db import transaction
 
+@transaction.atomic
 def handleJson(jsonObj):
-    sourceName  = jsonObj['source']
-    destName = jsonObj['destination']
+    try:
+        sourceName  = jsonObj['source']
+        destName = jsonObj['destination']
+        fields = jsonObj['fields']
+    except:
+        raise ValueError('Field Missing')
 
     findSource = System.objects.filter(name = sourceName)
     if findSource:
@@ -11,7 +17,6 @@ def handleJson(jsonObj):
         source = findSource[0]
     else:
         source = System(name = sourceName, color=getColorCode())
-        print(source)
         source.save()
 
     findDest = System.objects.filter(name = destName)
@@ -28,22 +33,21 @@ def handleJson(jsonObj):
     else:
         relation = Relationship(fromSystem = source, toSystem = dest)
         relation.save()
-    
-      
-    fields = jsonObj['fields']
+
+
+    # insert field
+    sourceSystem = System.objects.filter(name=sourceName)
+    attributes = sourceSystem[0].attributes.values_list("name", flat=True).distinct()
+    # print(attributes)
     for field in fields:
-        findField = Attribute.objects.filter(name = field)
-        if findField:
-            attribute = findField[0]
-        else:
-            attribute = Attribute(name = field)
-            attribute.save()
-        findInRelationship = True if attribute in relation.attributes.all() else False
-        if not findInRelationship:
-            relation.attributes.add(attribute)
+        if field in attributes:
+            continue
+        attribute = Attribute(name=field)
+        attribute.save()
+        sourceSystem[0].attributes.add(attribute)
+        sourceSystem[0].save()
 
 def getColorCode():
-    r = lambda: random.randint(0, 255)
-    return ('#%02X%02X%02X' % (r(), r(), r()))
-
+    color = "%06x" % random.randint(0, 0xFFFFFF)
+    return color
 

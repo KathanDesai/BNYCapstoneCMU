@@ -1,1 +1,1 @@
-web: gunicorn bny_Capstone.wsgi --log-file -
+web: gunicorn bny_Capstone.wsgi

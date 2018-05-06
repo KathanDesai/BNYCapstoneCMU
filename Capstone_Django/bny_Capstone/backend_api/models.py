@@ -6,11 +6,10 @@ class Attribute(models.Model):
 
 class System(models.Model):
     name = models.TextField(default="")
-    color = models.TextField(default="#a94442")
+    color = models.TextField(default="#3c763d")
     attributes = models.ManyToManyField(Attribute)
     #connectionsTo = models.ManyToManyField('self', symmetrical = False)
     #connectionsFrom = models.ManyToManyField('self', symmetrical = False)
-
 
     def addConnectionTo(self, otherSystem):
         self.connectionsTo.add(otherSystem)

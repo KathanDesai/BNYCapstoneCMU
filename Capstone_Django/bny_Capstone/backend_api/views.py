@@ -1,6 +1,5 @@
 import json
-import random
-from backend_api.models import *
+from django.db import transaction
 
 from django.http import HttpResponse, Http404, JsonResponse
 
@@ -12,9 +11,9 @@ from collections import defaultdict
 
 # Create your views here.
 def handle(request):
-    return HttpResponse("")
+    return HttpResponse("Home Page")
 
-
+@transaction.atomic
 def BNYBackEndPost(request):
     if request.method != 'POST' or not request.POST.get('JsonData'):
         raise Http404
@@ -22,8 +21,19 @@ def BNYBackEndPost(request):
     jsonObj = json.loads(jsonString)
     # {'source': 's1name', 'destination': 's2name', 'fields': ['fname1', 'fname2']}
     # print(jsonObj)
-    handleJson(jsonObj)
-    return HttpResponse(status=200)
+    try:
+        sourceName  = jsonObj['source']
+        destName = jsonObj['destination']
+        fields = jsonObj['fields']
+    except:
+        return JsonResponse({"error":"field missing or check spell"},status=400)
+
+    try:
+        handleJson(jsonObj)
+        return HttpResponse(status=200)
+    except:
+        return JsonResponse({"error":"field missing or check spell"},status=400)
+
 
 def fileUpload(request):
     if request.method != 'POST' or 'csv_file' not in request.FILES:
@@ -126,13 +136,20 @@ def getModels(request):
         return JsonResponse(result, status=400)
 
     for system in System.objects.all():
+
         obj = {}
         innerObj = {}
         innerObj['id'] = system.name
-        innerObj['color'] = system.color
+
+        innerObj['attributes'] = []
+
+        attributes_list = system.attributes.values_list("name", flat=True).distinct()
+        for i in attributes_list:
+            innerObj['attributes'].append(i)
+
+        obj['color'] = system.color
         obj['data'] = innerObj
         obj['type'] = "node"
-
         systems.append(obj)
 
     for relation in Relationship.objects.all():
@@ -149,10 +166,9 @@ def getModels(request):
 
 def manualProcessNode(request):
     if request.method != 'POST' or not request.POST.get('nodeName') or not request.POST.get('action'):
-        return HttpResponse(status=403)
+        return JsonResponse({'error': 'parameter missing'}, status=400)
     # user adds a new node to system
     nodeName = request.POST.get('nodeName')
-    print (nodeName)
     if request.POST.get('action') == 'add':
         system = System.objects.filter(name=nodeName)
 
@@ -161,10 +177,16 @@ def manualProcessNode(request):
         if not system or len(system) == 0:
             newSystem = System(name=nodeName)
             newSystem.save()
-            return HttpResponse(status=200)
+            system2 = System.objects.filter(name=nodeName)
+            if system2[0]:
+                obj = {}
+                obj['color'] = system2[0].color
+                return JsonResponse(obj, status=200)
+            else:
+                return JsonResponse({'error':'failed to insert'}, status=400)
         else:
             # try to add an existed node, return 404
-            return HttpResponse(status=403)
+            return HttpResponse(status=400)
 
     if request.POST.get('action') == 'remove':
         system = System.objects.filter(name=nodeName)
@@ -175,14 +197,14 @@ def manualProcessNode(request):
             return HttpResponse(status=200)
         else:
             # try to remove a non-existed node, return 404
-            return HttpResponse(status=403)
+            return HttpResponse(status=400)
     # for any unexpected error, return 404
-    return HttpResponse(status=403)
+    return HttpResponse(status=400)
 
 
 def manualProcessEdge(request):
     if request.method != 'POST' or not request.POST.get('source') or not request.POST.get('destination') or not request.POST.get('action'):
-        return HttpResponse(status=403)
+        return JsonResponse({'error': 'parameter missing'}, status=400)
 
     source = request.POST.get('source')
     dest = request.POST.get('destination')
@@ -193,7 +215,7 @@ def manualProcessEdge(request):
 
     if not sourceSystem or len(sourceSystem) == 0 or not destSystem or len(destSystem) == 0:
         # try to deal with systems don't exist
-        return HttpResponse(status=403)
+        return JsonResponse({'error': 'system does not exist'}, status=400)
 
     relationship = Relationship.objects.filter(fromSystem_id=sourceSystem[0], toSystem_id=destSystem[0])
 
@@ -201,17 +223,17 @@ def manualProcessEdge(request):
     if request.POST.get('action') == 'add':
         if relationship or len(relationship) > 0:
             # there is none relationship between source and dest
-            return HttpResponse(status=403)
+            return JsonResponse({'error':'this relationship has existed'},status=400)
         newR = Relationship(fromSystem=sourceSystem[0], toSystem=destSystem[0])
         newR.save()
         return HttpResponse(status=200)
     if request.POST.get('action') == 'remove':
         if not relationship:
-            return HttpResponse(status=403)
+            return JsonResponse({'error':'this relationship does not exist'},status=400)
         
         relationship[0].delete()
         return HttpResponse(status=200)
 
 def getColorCode():
-    r = lambda: random.randint(0, 255)
-    return ('#%02X%02X%02X' % (r(), r(), r()))
+    color = "%06x" % random.randint(0, 0xFFFFFF)
+    return color
