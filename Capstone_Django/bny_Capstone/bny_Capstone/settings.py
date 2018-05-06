@@ -25,7 +25,8 @@ SECRET_KEY = 'b1tx1er*p+v5mu=a0&n&n0own7lib8q)+p$cnk)+++t0wexwy9'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'https://data-lineage.herokuapp.com', 'herokuapp.com']
+# ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'https://data-lineage.herokuapp.com', 'herokuapp.com']
+ALLOWED_HOSTS = ['localhost','127.0.0.1', 'https://sleepy-waters-56352.herokuapp.com']
 
 # Application definition
 
@@ -37,9 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'backend_api',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.BrokenLinkEmailsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
