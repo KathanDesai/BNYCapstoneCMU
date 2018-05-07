@@ -71,6 +71,7 @@ def getOverlaps(request):
     for dest in Relationship.objects.values_list("toSystem_id",flat=True).distinct():
         destName = get_object_or_404(System, id=dest).name
         sources = Relationship.objects.filter(toSystem_id=dest)
+        seen = set()
 
         for i in range(len(sources)):
             # print (sources[i].fromSystem.name)
@@ -83,6 +84,8 @@ def getOverlaps(request):
                 # find intersect if any
                 intersect = list(set(relation1.attributes.all()) & set(relation2.attributes.all()))
 
+                
+
                 # if intersect detected
                 if len(intersect) > 0:
                     for field in intersect:
@@ -90,12 +93,18 @@ def getOverlaps(request):
                         innerObj['field'] = field.name
                         innerObj['dest'] = destName
                         innerObj['sources'] = sources[i].fromSystem.name
-                        overlaps.append(innerObj)
+                        string = innerObj['field'] + innerObj['dest'] + innerObj['sources']
+                        if string not in seen:
+                            overlaps.append(innerObj)
+                            seen.add(string)
                         innerObj = {}
                         innerObj['field'] = field.name
                         innerObj['dest'] = destName
                         innerObj['sources'] = sources[j].fromSystem.name
-                        overlaps.append(innerObj)
+                        string = innerObj['field'] + innerObj['dest'] + innerObj['sources']
+                        if string not in seen:
+                            overlaps.append(innerObj)
+                            seen.add(string)
     result['overlaps'] = overlaps    
     return JsonResponse(result, status=200)
 
