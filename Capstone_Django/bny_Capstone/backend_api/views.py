@@ -37,10 +37,10 @@ def BNYBackEndPost(request):
 
 def fileUpload(request):
     if request.method != 'POST' or 'csv_file' not in request.FILES:
-        raise Http404
+        return JsonResponse({"error":"csv_file parameter missing in POST request"},status=400)
     csv_file = request.FILES['csv_file']
     if not csv_file.name.endswith('.csv'):
-        raise Http404
+        return JsonResponse({"error":"Only .csv files are allowed"},status=400)
     file_data = csv_file.read().decode("utf-8") 
     lines = file_data.split("\n")
     for line in lines:
@@ -51,9 +51,10 @@ def fileUpload(request):
         jsonObj['destination'] = cols[1]
         jsonObj['fields'] = list()
         for i in range(2, len(cols)):
-            jsonObj['fields'].append(cols[i])
+            if cols[i].strip() != "":
+                jsonObj['fields'].append(cols[i])
         handleJson(jsonObj)
-    return HttpResponse()
+    return HttpResponse(status=200)
 
 
 def getOverlaps(request):
