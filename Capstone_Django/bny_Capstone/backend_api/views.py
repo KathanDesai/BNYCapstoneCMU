@@ -9,6 +9,14 @@ from backend_api.models import *
 from django.shortcuts import get_object_or_404
 from collections import defaultdict
 
+
+def clearDB(request):
+    System.objects.all().delete()
+    Attribute.objects.all().delete()
+    Relationship.objects.all().delete()
+    print('DB cleared')
+    return HttpResponse()
+
 # Create your views here.
 def handle(request):
     return HttpResponse("Home Page")

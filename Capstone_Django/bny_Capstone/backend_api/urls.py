@@ -9,5 +9,6 @@ urlpatterns = [
     url(r'^getOverlaps', views.getOverlaps),
     url(r'^manualProcessNode', views.manualProcessNode),
     url(r'^manualProcessRelationship', views.manualProcessEdge),
-    url(r'^fileUpload', views.fileUpload)
+    url(r'^fileUpload', views.fileUpload),
+    url(r'^clearDB', views.clearDB)
     ]
