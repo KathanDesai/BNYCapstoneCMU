@@ -47,7 +47,19 @@ def handleJson(jsonObj):
         sourceSystem[0].attributes.add(attribute)
         sourceSystem[0].save()
 
+    for field in fields:
+        findField = Attribute.objects.filter(name = field)
+        if findField:
+            attribute = findField[0]
+        else:
+            attribute = Attribute(name = field)
+            attribute.save()
+        findInRelationship = True if attribute in relation.attributes.all() else False
+        if not findInRelationship:
+            relation.attributes.add(attribute)
+
 def getColorCode():
-    color = "%06x" % random.randint(0, 0xFFFFFF)
+    r = lambda: random.randint(0, 255)
+    color =  '#%02X%02X%02X' % (r(), r(), r())
     return color
 

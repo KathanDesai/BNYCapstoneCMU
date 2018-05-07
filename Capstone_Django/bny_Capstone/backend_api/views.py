@@ -2,7 +2,7 @@ import json
 from django.db import transaction
 
 from django.http import HttpResponse, Http404, JsonResponse
-
+import random
 from backend_api.DBdriver import *
 
 from backend_api.models import *
@@ -140,14 +140,14 @@ def getModels(request):
         obj = {}
         innerObj = {}
         innerObj['id'] = system.name
-
+        innerObj['color'] = system.color
         innerObj['attributes'] = []
 
         attributes_list = system.attributes.values_list("name", flat=True).distinct()
         for i in attributes_list:
             innerObj['attributes'].append(i)
 
-        obj['color'] = system.color
+
         obj['data'] = innerObj
         obj['type'] = "node"
         systems.append(obj)
@@ -169,24 +169,27 @@ def manualProcessNode(request):
         return JsonResponse({'error': 'parameter missing'}, status=400)
     # user adds a new node to system
     nodeName = request.POST.get('nodeName')
+
     if request.POST.get('action') == 'add':
         system = System.objects.filter(name=nodeName)
-
+        print ('aaaaaa')
         # system = get_object_or_404(System, name=nodeName)
         # system does not existed, create a new one and savew
         if not system or len(system) == 0:
-            newSystem = System(name=nodeName)
+            code = getColorCode()
+            newSystem = System(name=nodeName, color=code)
             newSystem.save()
-            system2 = System.objects.filter(name=nodeName)
-            if system2[0]:
-                obj = {}
-                obj['color'] = system2[0].color
-                return JsonResponse(obj, status=200)
-            else:
-                return JsonResponse({'error':'failed to insert'}, status=400)
+            # system2 = System.objects.filter(name=nodeName)
+            # if system2[0]:
+            #     obj = {}
+            #     obj['color'] = system2[0].color
+            #     return JsonResponse(obj, status=200)
+            # else:
+            #     return JsonResponse({'error':'failed to insert'}, status=400)
+            return JsonResponse({'color': code}, status=200)
         else:
             # try to add an existed node, return 404
-            return HttpResponse(status=400)
+            return JsonResponse({'error': 'insert an existed node'}, status=400)
 
     if request.POST.get('action') == 'remove':
         system = System.objects.filter(name=nodeName)
@@ -197,9 +200,9 @@ def manualProcessNode(request):
             return HttpResponse(status=200)
         else:
             # try to remove a non-existed node, return 404
-            return HttpResponse(status=400)
+            return HttpResponse("remove a node doesn't exist", status=400)
     # for any unexpected error, return 404
-    return HttpResponse(status=400)
+    return HttpResponse("unknown error", status=400)
 
 
 def manualProcessEdge(request):
@@ -234,6 +237,8 @@ def manualProcessEdge(request):
         relationship[0].delete()
         return HttpResponse(status=200)
 
+
 def getColorCode():
-    color = "%06x" % random.randint(0, 0xFFFFFF)
+    r = lambda: random.randint(0, 255)
+    color =  '#%02X%02X%02X' % (r(), r(), r())
     return color
