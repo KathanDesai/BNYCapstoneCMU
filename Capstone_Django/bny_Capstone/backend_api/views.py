@@ -51,7 +51,7 @@ def fileUpload(request):
         return JsonResponse({"error":"Only .csv files are allowed"},status=400)
     file_data = csv_file.read().decode("utf-8") 
     lines = file_data.split("\n")
-    for line in lines:
+    for line in lines[1:]:
         cols = line.strip().split(',')
         if len(cols) < 2: continue
         jsonObj = {}
