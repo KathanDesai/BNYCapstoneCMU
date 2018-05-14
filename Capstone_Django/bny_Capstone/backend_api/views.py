@@ -9,7 +9,7 @@ from backend_api.models import *
 from django.shortcuts import get_object_or_404
 from collections import defaultdict
 
-
+# Method that clears the Database
 def clearDB(request):
     System.objects.all().delete()
     Attribute.objects.all().delete()
@@ -21,6 +21,7 @@ def clearDB(request):
 def handle(request):
     return HttpResponse("Home Page")
 
+# Method that takes the input data through json request
 @transaction.atomic
 def BNYBackEndPost(request):
     if request.method != 'POST' or not request.POST.get('JsonData'):
@@ -43,6 +44,7 @@ def BNYBackEndPost(request):
         return JsonResponse({"error":"field missing or check spell"},status=400)
 
 
+# Method that handles the input through file upload
 def fileUpload(request):
     if request.method != 'POST' or 'csv_file' not in request.FILES:
         return JsonResponse({"error":"csv_file parameter missing in POST request"},status=400)
@@ -64,7 +66,7 @@ def fileUpload(request):
         handleJson(jsonObj)
     return HttpResponse(status=200)
 
-
+# Method that returns a JSON string representing Overlaps
 def getOverlaps(request):
     result = {}
     overlaps = []
@@ -108,43 +110,7 @@ def getOverlaps(request):
     result['overlaps'] = overlaps    
     return JsonResponse(result, status=200)
 
-""" 
-def getOverlaps(request):
-    result = {}
-    result['overlaps'] = []
-    # for every target system
-    for dest in Relationship.objects.values_list("toSystem_id",flat=True).distinct():
-        obj = {}
-        obj['dest'] = get_object_or_404(System, id=dest).name
-        #
-        obj['overlap'] = []
-        # find all the source systems whose destination is dest
-        sources = Relationship.objects.filter(toSystem_id=dest)
-
-        for i in range(len(sources)):
-            # print (sources[i].fromSystem.name)
-            # fields involves message from i to dest
-            relation1 =get_object_or_404(Relationship, toSystem_id=dest, fromSystem_id=sources[i].fromSystem.id)
-            # print (relation1.attributes.all())
-            for j in range(i + 1, len(sources)):
-                # fields involves message from j to dest
-                relation2 = get_object_or_404(Relationship, toSystem_id=dest, fromSystem_id=sources[j].fromSystem.id)
-                # find intersect if any
-                intersect = list(set(relation1.attributes.all()) & set(relation2.attributes.all()))
-
-                # if intersect detected
-                if len(intersect) > 0:
-                    for field in intersect:
-                        innerObj = {}
-                        innerObj['field'] = field.name
-                        innerObj['sources'] = [sources[i].fromSystem.name, sources[j].fromSystem.name]
-                        obj['overlap'].append(innerObj)
-
-                        # print(dest.fromSystem.name + ' -> ' + dest.toSystem.name)
-        result['overlaps'].append(obj)
-    return JsonResponse(result, status=200) """
-
-
+# Method that returns a JSON string representing lineage model
 def getModels(request):
     result = {}
     systems = []
