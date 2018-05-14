@@ -4,6 +4,10 @@
 
 Install Python 3.x if not present
 
+Install django and other packages by ```pip```
+```pip install django```
+```install django-cors-headers```
+
 ## Start the application
 
 Go to the directory Capstone_Django/bny_Capstone and run the below command
