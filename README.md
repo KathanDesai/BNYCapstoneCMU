@@ -4,9 +4,10 @@
 
 Install Python 3.x if not present
 
-Install django and other packages by ```pip```
+Install django and other packages by pip
 ```pip install django```
-```install django-cors-headers```
+
+```pip install django-cors-headers```
 
 ## Start the application
 
